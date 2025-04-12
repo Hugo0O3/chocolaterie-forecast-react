@@ -12,7 +12,7 @@ let model = null;
 
 const loadModel = async () => {
   if (!model) {
-    model = await tf.loadLayersModel('/model/model.json'); // Charger le modèle TensorFlow.js
+    model = await tf.loadLayersModel('/model3/model.json'); // Charger le modèle TensorFlow.js
     console.log("Modèle chargé !");
   }
 };
