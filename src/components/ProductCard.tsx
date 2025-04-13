@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { getCategoryImage } from '../utils/chocolateCategories';
 
 export interface Product {
   id: number;
@@ -25,7 +26,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, rank }) => {
       )}
       <div className="relative bg-cream-100 rounded-md overflow-hidden h-40 mb-4">
         <img 
-          src={product.image} 
+          src={product.image !== "/placeholder.svg" ? product.image : getCategoryImage(product.category)} 
           alt={product.name} 
           className="w-full h-full object-cover"
         />
