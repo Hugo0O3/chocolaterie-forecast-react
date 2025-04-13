@@ -18,7 +18,7 @@ const ProductCard = ({ product, rank }) => {
         description: `Ce produit est prédit comme étant populaire selon nos algorithmes. Score de prédiction: ${typeof product === 'number' ? product.toFixed(2) : (product.score ? product.score.toFixed(2) : '?')}`,
         popularity: typeof product === 'number' ? Math.round(product * 100) : (product.score ? Math.round(product.score * 100) : 50),
         image: "/placeholder.svg",
-        category: categories[rank ? (rank - 1) % categories.length : 0]
+        category: product.category || categories[rank ? (rank - 1) % categories.length : 0]
       };
 
   return (
@@ -30,7 +30,7 @@ const ProductCard = ({ product, rank }) => {
       )}
       <div className="relative bg-cream-100 rounded-md overflow-hidden h-40 mb-4">
         <img 
-          src={displayProduct.image !== "/placeholder.svg" ? displayProduct.image : getCategoryImage(displayProduct.category)} 
+          src={getCategoryImage(displayProduct.category)} 
           alt={displayProduct.name} 
           className="w-full h-full object-cover"
         />
