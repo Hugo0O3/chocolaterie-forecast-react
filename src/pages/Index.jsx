@@ -1,61 +1,49 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChocolateHeader from '@/components/ChocolateHeader';
 import ChocolateFooter from '@/components/ChocolateFooter';
 import PredictionInputForm from '@/components/PredictionInputForm';
 import ProductCard from '@/components/ProductCard';
+import Predictor from '@/components/Predictor';
+import NewRecipeForm from '@/components/NewRecipeForm';
 import { useToast } from '@/hooks/use-toast';
-import * as tf from '@tensorflow/tfjs'; // Importation de TensorFlow.js
-import { encodeInputForModel } from '@/utils/preprocessing'; // Importation de l'encodeur
-
-let model = null;
-
-const loadModel = async () => {
-  if (!model) {
-    model = await tf.loadLayersModel('/model3/model.json'); // Charger le modèle TensorFlow.js
-    console.log("Modèle chargé !");
-  }
-};
 
 const Index = () => {
   const { toast } = useToast();
   const [topProducts, setTopProducts] = useState([]);
   const [activeTab, setActiveTab] = useState("predictions");
   const [hasPredictions, setHasPredictions] = useState(false);
+  const [formData, setFormData] = useState(null);
+  const [generatedRecipes, setGeneratedRecipes] = useState([]);
 
-  const handlePredictionSubmit = async (formData) => {
-    await loadModel();
-
-    // Encoder les données d'entrée pour le modèle
-    const inputTensor = encodeInputForModel({
-      Fete_Proche: formData.Fete_Proche,
-      Meteo: formData.Meteo,
-      Jour_De_La_Semaine: formData.Jour_De_La_Semaine,
-      Promotion: formData.Promotion,
-      Conge: formData.Conge,
-      Fin_Du_Mois: formData.Fin_Du_Mois,
-      Evenement_Local: formData.Evenement_Local
+  const handlePredictionSubmit = (data) => {
+    setFormData(data);
+    toast({
+      title: "Traitement en cours",
+      description: "Nous calculons les prédictions de ventes...",
+      duration: 3000
     });
+  };
 
-    // Faire une prédiction avec le modèle
-    const prediction = model.predict(inputTensor);
-    const result = await prediction.array(); // [vente_1, vente_2, ..., vente_7]
-
-    // Créer une liste des produits avec leurs scores
-    const predictedProducts = result[0].map((value, index) => ({
-      id: index + 1,
-      name: `Produit ${index + 1}`,
-      score: value
-    }));
-
-    // Mettre à jour l'état avec les prédictions
-    setTopProducts(predictedProducts);
+  const handlePredictionComplete = (results) => {
+    // Trier les résultats par score en ordre décroissant
+    const sortedResults = [...results].sort((a, b) => b.score - a.score);
+    setTopProducts(sortedResults);
     setHasPredictions(true);
-
-    // Afficher un toast pour informer l'utilisateur
+    
     toast({
       title: "Prédictions générées",
       description: "Les ventes estimées ont été calculées avec succès.",
+      duration: 3000
+    });
+  };
+
+  const handleRecipeGeneration = (recipes) => {
+    setGeneratedRecipes(recipes);
+    toast({
+      title: "Recettes générées",
+      description: `${recipes.length} nouvelles recettes ont été créées.`,
       duration: 3000
     });
   };
@@ -99,6 +87,8 @@ const Index = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-1">
                       <PredictionInputForm onSubmit={handlePredictionSubmit} />
+                      {/* Ajout du composant Predictor caché pour gérer les prédictions */}
+                      <Predictor formData={formData} onPredictionComplete={handlePredictionComplete} />
                     </div>
                     <div className="lg:col-span-2">
                       {hasPredictions ? (
@@ -107,8 +97,8 @@ const Index = () => {
                             Top 10 des Produits à Promouvoir
                           </h2>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                            {topProducts.map((product, index) => (
-                              <div key={product.id} className="relative">
+                            {topProducts.slice(0, 10).map((product, index) => (
+                              <div key={product.id || index} className="relative">
                                 <ProductCard product={product} rank={index + 1} />
                               </div>
                             ))}
@@ -126,6 +116,47 @@ const Index = () => {
                           </h3>
                           <p className="text-chocolate-600">
                             Utilisez le formulaire pour générer une prédiction des produits qui se vendront le mieux en fonction des paramètres.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="recipes" className="mt-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-1">
+                      <NewRecipeForm onGenerate={handleRecipeGeneration} />
+                    </div>
+                    <div className="lg:col-span-2">
+                      {generatedRecipes.length > 0 ? (
+                        <div>
+                          <h2 className="text-2xl font-playfair font-semibold text-chocolate-800 mb-6">
+                            Nouvelles Recettes Générées
+                          </h2>
+                          <div className="grid grid-cols-1 gap-6 relative">
+                            {generatedRecipes.map((recipe, index) => (
+                              <div key={recipe.id} className="relative">
+                                <ProductCard product={{
+                                  ...recipe,
+                                  popularity: 80 + Math.floor(Math.random() * 20),
+                                }} />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-center p-10 bg-cream-100 rounded-lg border border-chocolate-200">
+                          <img
+                            src="/placeholder.svg"
+                            alt="Chocolat"
+                            className="w-32 h-32 mb-6 opacity-30 animate-float"
+                          />
+                          <h3 className="text-2xl font-playfair text-chocolate-700 mb-3">
+                            Générez des recettes
+                          </h3>
+                          <p className="text-chocolate-600">
+                            Utilisez le formulaire pour créer de nouvelles recettes à base de chocolat avec l'aide de l'IA.
                           </p>
                         </div>
                       )}

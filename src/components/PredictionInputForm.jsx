@@ -69,7 +69,28 @@ const PredictionInputForm = ({ onSubmit, className }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Vérifier que les champs obligatoires sont remplis
+    if (!formData.nearestHoliday || !formData.weather) {
+      alert("Veuillez sélectionner une fête et des conditions météorologiques");
+      return;
+    }
+    
+    // Pour le débogage
+    console.log("Données du formulaire soumises:", formData);
+    
+    // Envoyer les données au parent
+    onSubmit({
+      ...formData,
+      // Renommer pour correspondre à la structure attendue par le modèle
+      Fete_Proche: formData.nearestHoliday,
+      Meteo: formData.weather,
+      Jour_De_La_Semaine: formData.isWeekend ? "weekend" : "semaine",
+      Promotion: formData.hasPromotion,
+      Conge: formData.isHoliday,
+      Fin_Du_Mois: !formData.isBeginningOfMonth, // Inverse of isBeginningOfMonth
+      Evenement_Local: formData.hasLocalEvent
+    });
   };
 
   const handleChange = (field, value) => {
