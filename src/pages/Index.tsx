@@ -7,6 +7,8 @@ import PredictionInputForm, { PredictionFormData } from '@/components/Prediction
 import NewRecipeForm, { Recipe } from '@/components/NewRecipeForm';
 import ProductCard, { Product } from '@/components/ProductCard';
 import RecipeCard from '@/components/RecipeCard';
+import PackagingForm, { Packaging } from '@/components/PackagingForm';
+import PackagingCard from '@/components/PackagingCard';
 import { predictTopProducts } from '@/utils/mockData';
 import { useToast } from '@/hooks/use-toast';
 
@@ -14,9 +16,11 @@ const Index = () => {
   const { toast } = useToast();
   const [topProducts, setTopProducts] = useState<Product[]>([]);
   const [newRecipes, setNewRecipes] = useState<Recipe[]>([]);
+  const [newPackagings, setNewPackagings] = useState<Packaging[]>([]);
   const [activeTab, setActiveTab] = useState<string>("predictions");
   const [hasPredictions, setHasPredictions] = useState<boolean>(false);
   const [hasRecipes, setHasRecipes] = useState<boolean>(false);
+  const [hasPackagings, setHasPackagings] = useState<boolean>(false);
 
   const handlePredictionSubmit = (data: PredictionFormData) => {
     // Simulons un appel à un modèle d'IA
@@ -47,6 +51,20 @@ const Index = () => {
     }, 800);
   };
 
+  const handlePackagingGenerate = (packagings: Packaging[]) => {
+    // Simulons un appel à un modèle d'IA pour générer des packagings
+    setTimeout(() => {
+      setNewPackagings(packagings);
+      setHasPackagings(true);
+      
+      toast({
+        title: "Nouveaux packagings créés",
+        description: "2 nouveaux designs d'emballage ont été générés avec succès.",
+        duration: 3000,
+      });
+    }, 800);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <ChocolateHeader />
@@ -66,7 +84,7 @@ const Index = () => {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid grid-cols-2 mb-8">
+            <TabsList className="grid grid-cols-3 mb-8">
               <TabsTrigger 
                 value="predictions" 
                 className="text-lg font-playfair py-3 data-[state=active]:bg-chocolate-600 data-[state=active]:text-white"
@@ -78,6 +96,12 @@ const Index = () => {
                 className="text-lg font-playfair py-3 data-[state=active]:bg-chocolate-600 data-[state=active]:text-white"
               >
                 Nouvelles Recettes
+              </TabsTrigger>
+              <TabsTrigger 
+                value="packagings" 
+                className="text-lg font-playfair py-3 data-[state=active]:bg-chocolate-600 data-[state=active]:text-white"
+              >
+                Nouveaux Packagings
               </TabsTrigger>
             </TabsList>
             
@@ -148,6 +172,42 @@ const Index = () => {
                       </h3>
                       <p className="text-chocolate-600">
                         Utilisez le formulaire pour générer de nouvelles recettes de chocolat basées sur vos préférences.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="packagings" className="mt-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1">
+                  <PackagingForm onGenerate={handlePackagingGenerate} />
+                </div>
+                <div className="lg:col-span-2">
+                  {hasPackagings ? (
+                    <div>
+                      <h2 className="text-2xl font-playfair font-semibold text-chocolate-800 mb-6">
+                        Nouveaux Packagings Générés
+                      </h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {newPackagings.map((packaging) => (
+                          <PackagingCard key={packaging.id} packaging={packaging} />
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-center p-10 bg-cream-100 rounded-lg border border-chocolate-200">
+                      <img 
+                        src="/placeholder.svg" 
+                        alt="Packaging" 
+                        className="w-32 h-32 mb-6 opacity-30 animate-float"
+                      />
+                      <h3 className="text-2xl font-playfair text-chocolate-700 mb-3">
+                        Créez de nouveaux packagings
+                      </h3>
+                      <p className="text-chocolate-600">
+                        Utilisez le formulaire pour concevoir de nouveaux emballages pour vos chocolats.
                       </p>
                     </div>
                   )}

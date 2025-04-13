@@ -17,9 +17,9 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, rank }) => {
   return (
-    <div className="chocolate-card flex flex-col h-full">
+    <div className="chocolate-card flex flex-col h-full relative">
       {rank && (
-        <div className="absolute -top-3 -left-3 bg-chocolate-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-lg">
+        <div className="absolute -top-3 -left-3 bg-chocolate-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-lg z-10">
           {rank}
         </div>
       )}
